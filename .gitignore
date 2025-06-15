@@ -35,4 +35,8 @@ build/
 .vscode/
 
 ### Mac OS ###
+.DS_Storetarget/
+allure-results/
+.idea/
+*.iml
 .DS_Store
