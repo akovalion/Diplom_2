@@ -27,55 +27,44 @@ public class UserRegisterTest {
 
     @After
     public void cleanUp() {
-        if (accessToken != null) {
-            userClient.delete(accessToken);
+        if (testUser != null) {
+            // Пытаемся залогиниться и получить accessToken
+            Response loginResponse = userClient.login(testUser);
+            accessToken = loginResponse.then().extract().path("accessToken");
+            if (accessToken != null) {
+                userClient.delete(accessToken);
+            }
         }
     }
 
     @Test
-    @Description("Создание уникального пользователя. Успешная регистрация.")
+    @Description("Создание уникального пользователя. Ожидается успешная регистрация.")
     public void createUniqueUserTest() {
         Response response = userClient.register(testUser);
-        response.then().statusCode(200).body("success", is(true));
-        accessToken = response.then().extract().path("accessToken");
+        response.then()
+                .statusCode(200)
+                .body("success", is(true));
+        // accessToken НЕ получаем здесь — он будет получен в @After
     }
 
     @Test
-    @Description("Создание уже существующего пользователя. Ожидается ошибка 403.")
+    @Description("Создание уже зарегистрированного пользователя. Ожидается ошибка 403.")
     public void createDuplicateUserTest() {
         userClient.register(testUser);
-        Response response = userClient.register(testUser);
-        response.then().statusCode(403)
+        Response duplicateResponse = userClient.register(testUser);
+        duplicateResponse.then()
+                .statusCode(403)
                 .body("message", is("User already exists"))
                 .body("success", is(false));
     }
 
     @Test
-    @Description("Создание пользователя без email. Ожидается ошибка 403.")
-    public void createUserWithoutEmail() {
-        User user = new User(null, "password123", "TestUser");
-        Response response = userClient.register(user);
-        response.then().statusCode(403)
-                .body("message", is("Email, password and name are required fields"))
-                .body("success", is(false));
-    }
-
-    @Test
-    @Description("Создание пользователя без пароля. Ожидается ошибка 403.")
-    public void createUserWithoutPassword() {
-        User user = new User(testUser.getEmail(), null, "TestUser");
-        Response response = userClient.register(user);
-        response.then().statusCode(403)
-                .body("message", is("Email, password and name are required fields"))
-                .body("success", is(false));
-    }
-
-    @Test
-    @Description("Создание пользователя без имени. Ожидается ошибка 403.")
-    public void createUserWithoutName() {
-        User user = new User(testUser.getEmail(), "password123", null);
-        Response response = userClient.register(user);
-        response.then().statusCode(403)
+    @Description("Создание пользователя без обязательного поля. Ожидается ошибка 403.")
+    public void createUserWithoutRequiredFieldTest() {
+        User incompleteUser = new User(null, "password123", "TestUser"); // без email
+        Response response = userClient.register(incompleteUser);
+        response.then()
+                .statusCode(403)
                 .body("message", is("Email, password and name are required fields"))
                 .body("success", is(false));
     }

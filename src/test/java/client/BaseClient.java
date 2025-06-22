@@ -1,14 +1,15 @@
 package client;
 
 import io.restassured.specification.RequestSpecification;
-import static io.restassured.RestAssured.given;
 
-public class BaseClient {
-    private static final String BASE_URL = "https://stellarburgers.nomoreparties.site";
+import static io.restassured.RestAssured.requestSpecification;
+import static io.restassured.RestAssured.with;
 
-    protected RequestSpecification getSpec() {
-        return given()
-                .baseUri(BASE_URL)
+public abstract class BaseClient {
+
+    protected RequestSpecification getBaseSpec() {
+        return with()
+                .baseUri("https://stellarburgers.nomoreparties.site")
                 .header("Content-type", "application/json");
     }
 }

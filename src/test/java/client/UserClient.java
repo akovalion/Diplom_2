@@ -8,17 +8,19 @@ import static io.restassured.RestAssured.given;
 
 public class UserClient extends BaseClient {
 
-    @Step("Создание пользователя")
+    @Step("Регистрация нового пользователя")
     public Response register(User user) {
-        return getSpec()
+        return given()
+                .spec(getBaseSpec())
                 .body(user)
                 .when()
                 .post("/api/auth/register");
     }
 
-    @Step("Логин пользователя")
+    @Step("Авторизация пользователя")
     public Response login(User user) {
-        return getSpec()
+        return given()
+                .spec(getBaseSpec())
                 .body(user)
                 .when()
                 .post("/api/auth/login");
@@ -27,8 +29,9 @@ public class UserClient extends BaseClient {
     @Step("Удаление пользователя")
     public Response delete(String accessToken) {
         return given()
+                .spec(getBaseSpec())
                 .header("Authorization", accessToken)
                 .when()
-                .delete("https://stellarburgers.nomoreparties.site/api/auth/user");
+                .delete("/api/auth/user");
     }
 }

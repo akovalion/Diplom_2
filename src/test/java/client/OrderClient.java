@@ -1,33 +1,38 @@
 package client;
 
+import io.qameta.allure.Step;
 import io.restassured.response.Response;
 import model.Order;
 
 import static io.restassured.RestAssured.given;
 
-public class OrderClient {
-    private static final String BASE_URL = "https://stellarburgers.nomoreparties.site";
+public class OrderClient extends BaseClient {
 
-    // Создание заказа (авторизованный и неавторизованный)
-    public Response createOrder(Order order, String accessToken) {
+    @Step("Создание заказа с авторизацией")
+    public Response create(Order order, String accessToken) {
         return given()
-                .header("Content-type", "application/json")
-                .baseUri(BASE_URL)
-                .basePath("/api/orders")
-                .auth().oauth2(accessToken.replace("Bearer ", ""))
+                .spec(getBaseSpec())
+                .header("Authorization", accessToken)
                 .body(order)
                 .when()
-                .post();
+                .post("/api/orders");
     }
 
-    // Создание заказа без авторизации
-    public Response createOrderWithoutAuth(Order order) {
+    @Step("Создание заказа без авторизации")
+    public Response create(Order order) {
         return given()
-                .header("Content-type", "application/json")
-                .baseUri(BASE_URL)
-                .basePath("/api/orders")
+                .spec(getBaseSpec())
                 .body(order)
                 .when()
-                .post();
+                .post("/api/orders");
+    }
+
+    @Step("Получение списка заказов")
+    public Response getOrders(String accessToken) {
+        return given()
+                .spec(getBaseSpec())
+                .header("Authorization", accessToken)
+                .when()
+                .get("/api/orders");
     }
 }
